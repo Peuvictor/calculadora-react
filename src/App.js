@@ -2,6 +2,7 @@ import { useReducer } from 'react';
 import './App.css';
 import Display from './components/Display';
 import Button from './components/Button';
+import { useReducer, useEffect } from 'react';
 
 export const ACTIONS = {
   ADD_DIGIT: 'add-digit',
@@ -171,6 +172,34 @@ function App() {
 
   const chooseOp = (op) =>
     dispatch({ type: ACTIONS.CHOOSE_OPERATION, payload: { operation: op } });
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      const { key } = e;
+
+      if (key >= '0' && key <= '9') {
+        dispatch({ type: ACTIONS.ADD_DIGIT, payload: { digit: key } });
+      } else if (key === '.' || key === ',') {
+        dispatch({ type: ACTIONS.ADD_DIGIT, payload: { digit: '.' } });
+      } else if (key === '+' || key === '-' || key === '*') {
+        dispatch({ type: ACTIONS.CHOOSE_OPERATION, payload: { operation: key } });
+      } else if (key === '/') {
+        e.preventDefault();
+        dispatch({ type: ACTIONS.CHOOSE_OPERATION, payload: { operation: '÷' } });
+      } else if (key === 'Enter' || key === '=') {
+        e.preventDefault();
+        dispatch({ type: ACTIONS.EVALUATE });
+      } else if (key === 'Backspace') {
+        dispatch({ type: ACTIONS.DELETE_DIGIT });
+      } else if (key === 'Escape' || key.toLowerCase() === 'c') {
+        dispatch({ type: ACTIONS.CLEAR });
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+
+    // Cleanup: remove o listener se o componente for desmontado
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   return (
     <div className="calculator-grid">
